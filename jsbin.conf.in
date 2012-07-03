@@ -1,0 +1,52 @@
+# JS Bin - default Apache configuration
+# /etc/apache2/conf.d/jsbin.conf
+Alias @ROOT_@ @JSBIN_DIR@
+
+<Directory @JSBIN_DIR@>
+    AllowOverride All
+    Options FollowSymLinks
+    DirectoryIndex index.php
+    <IfModule mod_php5.c>
+        AddType application/x-httpd-php .php
+        php_flag magic_quotes_gpc Off
+        php_flag track_vars On
+        php_flag register_globals Off
+        php_admin_flag allow_url_fopen Off
+        php_value include_path .
+        php_value error_reporting 2
+        # 2 == E_ALL & ~E_DEPRECATED
+    </IfModule>
+</Directory>
+
+# 
+# :ide-menu: Emacs IDE Main Menu - Buffer @BUFFER@
+# . M-x `eIDE-menu' ()(eIDE-menu "z")
+
+# :ide: CMD: Get trac-80-ws_rfid.conf as wsgi.conf from /etc/apache2/conf.d/
+# . (let* ((fp (buffer-file-name)) (fn (file-name-nondirectory fp))) (shell-command (concat "cp -p /etc/apache2/conf.d/trac-80-ws_rfid.conf" fn " ./wsgi.conf") nil nil))
+
+# :ide: GOTO: apache2 log
+# . (find-file-other-window "/var/log/apache2/")
+
+# :ide: GOTO: apache2 log "users"
+# . (find-file-other-window "/var/log/apache2/users")
+
+# :ide: CMD: dired /etc/apache2/conf.d/
+# . (let* ((fp (buffer-file-name)) (fn (file-name-nondirectory fp))) (dired-other-window (concat "/etc/apache2/conf.d/")))
+
+# :ide: CMD: restart apache
+# . (let* ((fp (buffer-file-name)) (fn (file-name-nondirectory fp))) (shell-command (concat "/etc/init.d/apache2 restart" ) nil nil))
+
+# :ide: CMD: reload apache
+# . (let* ((fp (buffer-file-name)) (fn (file-name-nondirectory fp))) (shell-command (concat "/etc/init.d/apache2 reload" ) nil nil))
+
+# :ide: CMD: Install jsbin.conf as /etc/apache2/conf.d/jsbin.conf
+# . (let* ((fp (buffer-file-name)) (fn (file-name-nondirectory fp))) (shell-command (concat "cp -p " fn " /etc/apache2/conf.d/jsbin.conf") nil nil))
+
+# :ide: CMD: diff -ubB jsbin.conf /etc/apache2/conf.d/jsbin.conf
+# . (let* ((fp (buffer-file-name)) (fn (file-name-nondirectory fp))) (shell-command (concat "diff -ubB " fn " /etc/apache2/conf.d/jsbin.conf") nil nil))
+
+# :ide: +#-
+# . Tools ()
+
+# 

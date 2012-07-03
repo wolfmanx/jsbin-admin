@@ -1,0 +1,49 @@
+#!/bin/sh
+
+# jsbin-admin - wrapper for JS Bin administration script
+
+# usage: jsbin-admin ...
+
+# Copyright (C) 2012, Wolfgang Scherer, <Wolfgang.Scherer at gmx.de>
+# Sponsored by WIEDENMANN SEILE GMBH, http://www.wiedenmannseile.de
+#
+# This file is part of Wiedenmann Utilities.
+#
+# See MIT-LICENSE.TXT for conditions.
+:  # script help
+
+# --------------------------------------------------
+# |||:sec:||| MAIN
+# --------------------------------------------------
+
+# |:here:|
+INST_DIR="@INST_DIR@"
+export INST_DIR
+exec "${INST_DIR}/jsbin.sh" ${1+"$@"}
+
+exit # |||:here:|||
+
+#
+# :ide-menu: Emacs IDE Main Menu - Buffer @BUFFER@
+# . M-x `eIDE-menu' (eIDE-menu "z")
+
+# :ide: SNIP: insert OPTION LOOP
+# . (snip-insert-mode "sh_b.opt-loop" nil t)
+
+# :ide: SHELL: Run with --docu
+# . (progn (save-buffer) (shell-command (concat "sh " (file-name-nondirectory (buffer-file-name)) " --docu")))
+
+# :ide: SHELL: Run with --help
+# . (progn (save-buffer) (shell-command (concat "sh " (file-name-nondirectory (buffer-file-name)) " --help")))
+
+# :ide: SHELL: Run w/o args
+# . (progn (save-buffer) (shell-command (concat "sh " (file-name-nondirectory (buffer-file-name)) " ")))
+
+#
+# Local Variables:
+# mode: sh
+# comment-start: "#"
+# comment-start-skip: "#+"
+# comment-column: 0
+# End:
+# mmm-classes: (here-doc ide-entries)

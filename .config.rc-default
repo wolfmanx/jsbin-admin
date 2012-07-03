@@ -1,0 +1,33 @@
+# -*- sh -*-
+# --------------------------------------------------
+# Database Administration Parameters
+# --------------------------------------------------
+DB_HOST="localhost"
+DB_USER="jsbin-user"
+DB_PASSWORD="jsbin-000"
+DB_NAME="jsbin"
+
+# --------------------------------------------------
+# Wrapper Script Installation Parameters
+# --------------------------------------------------
+# Installation directory for jsbin-admin wrapper script.
+#BIN_DIR="/usr/local/bin"
+
+# --------------------------------------------------
+# JS Bin Configuration/Installation Parameters.
+# --------------------------------------------------
+
+# These directories are autodetected: $( pwd ) or $( pwd )/jsbin
+#JSBIN_DIR="/some/where/over/the/rainbow"
+
+# User and password for database and JS Bin user creation.
+#DB_ADMIN_USER="root"
+#DB_ADMIN_PASSWORD="password"
+
+# Default, if requested with `jsbin.sh install --debug`: JSBIN_DIR
+#OFFLINE=""
+
+HOST="http://localhost"
+OFFLINE=""
+ROOT_="/jsbin"
+ROOT="/jsbin/"
