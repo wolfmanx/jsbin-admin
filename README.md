@@ -27,10 +27,13 @@ ACTIONS
   rm, del[ete]          url, ...        delete url(s)
   rm, del[ete]          '*'             delete all url(s)
 
-  b[ackup]              [file]          dump database into FILE (jsbin-NNN.sql)
-  res[tore]             [file]          restore database from FILE (jsbin-NNN.sql)
+  b[ackup]              [-d, --dir dir] [file]
+                                        dump database into FILE
+                                        (jsbin-NNNNN.sql) in DIR (.)
+  res[tore]             [-d, --dir dir] [file]
+                                        restore database from FILE
+                                        (jsbin-NNNNN.sql) in DIR (.)
 </pre>
-	
 
 ## Minimal Installation (JS Bin not installed)
 
@@ -121,8 +124,8 @@ called with an absolute or relative pathname.
    * install a configuration file in `/etc/apache2/conf.d`
    * enable module `rewrite` in apache2
    * restart apache
-   * create the MySQL database
-   * create the JS Bin database user
+   * create the MySQL database (if necessary)
+   * create the JS Bin database user (always)
 
    In order to change the configuration, the `install` command can be
    performed multiple times without affecting the data in the
@@ -130,8 +133,8 @@ called with an absolute or relative pathname.
 
 ## Copyright
 
-Copyright (C) 2012, Wolfgang Scherer, <Wolfgang.Scherer at gmx.de>
-Sponsored by WIEDENMANN SEILE GMBH, http://www.wiedenmannseile.de
+Copyright (C) 2012, Wolfgang Scherer, <Wolfgang.Scherer@gmx.de>.
+Sponsored by WIEDENMANN SEILE GMBH, <http://www.wiedenmannseile.de>
 
 This file is part of Wiedenmann Utilities.
 
@@ -142,7 +145,7 @@ See MIT-LICENSE.TXT for conditions.
 . M-x `eIDE-menu' ()(eIDE-menu "z")
 
 :ide: COMPILE: markdown >README-md.html
-. (let ((opts "")) (compile (concat "markdown " opts " " (buffer-file-name) "  >README-md.html")))
+. (let* ((fn (buffer-file-name)) (title (file-name-sans-extension (file-name-nondirectory fn))) (opts "")) (compile (concat "( snr --key TITLE --value '" title "' html_md.head.github; markdown " opts " " fn "; snc html_md.foot.github; ) >" (buffer-file-name) ".html")))
 
 :ide: COMPILE: markdown
 . (let ((opts "")) (compile (concat "markdown " opts " " (buffer-file-name))))

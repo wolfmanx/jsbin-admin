@@ -43,8 +43,12 @@
 #   rm, del[ete]          url, ...        delete url(s)
 #   rm, del[ete]          '*'             delete all url(s)
 #
-#   b[ackup]              [file]          dump database into FILE (jsbin-NNN.sql)
-#   res[tore]             [file]          restore database from FILE (jsbin-NNN.sql)
+#   b[ackup]              [-d, --dir dir] [file]
+#                                         dump database into FILE
+#                                         (jsbin-NNNNN.sql) in DIR (.)
+#   res[tore]             [-d, --dir dir] [file]
+#                                         restore database from FILE
+#                                         (jsbin-NNNNN.sql) in DIR (.)
 #
 #   install               [OPTIONS]       setup, configure and install everything
 #                                         With -f, --force, drop database.
@@ -879,6 +883,44 @@ jsbin_set_config ()
     )
 }
 
+set_backup_options ()
+{
+    backup_dir="."
+    case "${1-}" in
+    -d|--d*) # --dir
+        shift
+        backup_dir="${1}"
+        shift;;
+    esac
+    file="${1-}"
+}
+
+goto_backup_dir ()
+{
+    if test -n "${ECHO}"
+    then
+        if test -d "${backup_dir}"
+        then
+            cd "${backup_dir}" 2>/dev/null || \
+            file="$(  printf "%s-%05d%s\n" "${DB_NAME}" "99999" ".sql" )"
+        fi
+    fi
+    texec mkdir -p "${backup_dir}"
+    texec cd "${backup_dir}" || exit 1
+}
+
+set_backup_file ()
+{
+    if test -z "${file}"
+    then
+        last_seq="$( last_file_seq "${DB_NAME}-" ".sql" )"
+        # 273.97260274 years worth of daily backups should be enough
+        test -z "${last_seq}" && last_seq=100000
+        next_seq="$( expr "${last_seq}" - 1 )"
+        file="$(  printf "%s-%05d%s\n" "${DB_NAME}" "${next_seq}" ".sql" )"
+    fi
+}
+
 last_file_seq ()
 {
     pfx="${1-}"
@@ -887,7 +929,8 @@ last_file_seq ()
     ${SED__PROG-sed} '
 s,^'"${pfx}"',,
 s,'"${sfx}"'$,,
-s,^00*,,
+s,^00*$,0,
+s,^00*\([^0]\),\1,
 q
 '
 }
@@ -1028,18 +1071,15 @@ rm|del|dele|delet|delete)
 #     user_add "${user}" "${password}"
 #     ;;
 b|ba|bac|back|backu|backup)
-    file="${1-}"
-    if test -z "${file}"
+    (
+    set_backup_options ${1+"$@"}
+    goto_backup_dir
+    set_backup_file
+
+    if test -r "${file}"
     then
-        last_seq="$( last_file_seq "${DB_NAME}-" ".sql" )"
-        test -z "${last_seq}" && last_seq=1000
-        next_seq="$( expr "${last_seq}" - 1 )"
-        file="$(  printf "%s-%03d%s\n" "${DB_NAME}" "${next_seq}" ".sql" )"
-        if test -r "${file}"
-        then
-            printf >&2 "error: \`%s\` already exists. Please, clean up.\n" "${file}"
-            exit 1
-        fi
+        printf >&2 "error: \`%s\` already exists. Please, clean up.\n" "${file}"
+        exit 1
     fi
 
     mysql_set_credentials
@@ -1053,26 +1093,27 @@ b|ba|bac|back|backu|backup)
     else
         texec ${MYSQL_DUMP} ${host_opt} ${db_host} ${user_opt} ${DB_USER} ${password_opt}${DB_PASSWORD} "${DB_NAME}" ">${file}"
     fi
+    )
     ;;
 res|rest|resto|restor|restore)
-    file="${1-}"
-    if test -z "${file}"
+    (
+    set_backup_options ${1+"$@"}
+    goto_backup_dir
+    set_backup_file
+
+    if test ! -r "${file}"
     then
-        last_seq="$( last_file_seq "${DB_NAME}-" ".sql" )"
-        test -z "${last_seq}" && last_seq=999
-        file="$(  printf "%s-%03d%s\n" "${DB_NAME}" "${last_seq}" ".sql" )"
-        if test ! -r "${file}"
-        then
-            printf >&2 "error: \`%s\` does not exist\n" "${file}"
-            exit 1
-        fi
+        printf >&2 "error: \`%s\` does not exist\n" "${file}"
+        exit 1
     fi
+
     if test -z "${ECHO}"
     then
         mysql_cmd <"${file}"
     else
         mysql_cmd '<'"${file}" </dev/null
     fi
+    )
     ;;
 install)
     opt_force=''
@@ -1166,11 +1207,14 @@ exit # |||:here:|||
 # :ide: SHELL: Run with --debug install
 # . (progn (save-buffer) (shell-command (concat "sh " (file-name-nondirectory (buffer-file-name)) " --debug install")))
 
+# :ide: SHELL: Run with --debug restore
+# . (progn (save-buffer) (shell-command (concat "sh " (file-name-nondirectory (buffer-file-name)) " --debug restore")))
+
 # :ide: SHELL: Run with --debug backup
 # . (progn (save-buffer) (shell-command (concat "sh " (file-name-nondirectory (buffer-file-name)) " --debug backup")))
 
-# :ide: SHELL: Run with --debug restore
-# . (progn (save-buffer) (shell-command (concat "sh " (file-name-nondirectory (buffer-file-name)) " --debug restore")))
+# :ide: SHELL: Run with --debug backup --dir /var/cache
+# . (progn (save-buffer) (shell-command (concat "sh " (file-name-nondirectory (buffer-file-name)) " --debug backup --dir /var/cache")))
 
 # :ide: SHELL: Run with --debug rename live live
 # . (progn (save-buffer) (shell-command (concat "sh " (file-name-nondirectory (buffer-file-name)) " --debug rename live live")))
