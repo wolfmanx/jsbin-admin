@@ -414,7 +414,7 @@ mysql_cmd ()
     mysql_set_credentials
     mysql_set_options
     printf "%s\n" "${script}" \
-    | texec ${MYSQL} ${host_opt} ${db_host} ${user_opt} ${db_user} ${password_opt}${db_password} "${DB_NAME}" ${1+"$@"}
+    | texec ${MYSQL} ${host_opt} ${db_host} ${user_opt} ${db_user} ${password_opt}${db_password} "${CONN_DB_NAME-${DB_NAME}}" ${1+"$@"}
     test -n "${script}" && tmsg "${script}"
 }
 
@@ -428,7 +428,7 @@ mysql_admin_cmd ()
     mysql_set_options
 
     printf "%s\n" "${script}" \
-    | texec ${MYSQL} ${host_opt} ${db_host} ${user_opt} ${db_user} ${password_opt}${db_password} "${DB_NAME}" ${1+"$@"}
+    | texec ${MYSQL} ${host_opt} ${db_host} ${user_opt} ${db_user} ${password_opt}${db_password} "${CONN_DB_NAME-${DB_NAME}}" ${1+"$@"}
     test -n "${script}" && tmsg "${script}"
 }
 
@@ -779,17 +779,23 @@ jsbin_install_db ()
     if test ${opt_force} = 1
     then
         # forcibly drop database
+	(
+	export CONN_DB_NAME='mysql'
         mysql_admin_cmd <<EOF
 ${MYSQL_HEADER}
 DROP DATABASE /*! IF EXISTS */ ${DB_NAME};
 EOF
+	)
     fi
 
     # create database
+    (
+    export CONN_DB_NAME='mysql'
     mysql_admin_cmd <<EOF
 ${MYSQL_HEADER}
 CREATE DATABASE /*! IF NOT EXISTS */ ${DB_NAME};
 EOF
+    )
 
     # drop user
     mysql_admin_cmd <<EOF
@@ -813,7 +819,13 @@ EOF
     fi
 
     # fill database
-    mysql_admin_cmd ${DB_NAME} <"${JSBIN_DIR}/build/jsbin.sql"
+    if test -r "${JSBIN_DIR}/build/full-db-v3.mysql.sql"
+    then
+	script="${JSBIN_DIR}/build/full-db-v3.mysql.sql"
+    else
+	script="${JSBIN_DIR}/build/jsbin.sql"
+    fi
+    mysql_admin_cmd <"${script}"
 }
 
 jsbin_get_config ()
