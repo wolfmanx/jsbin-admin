@@ -793,7 +793,7 @@ EOF
     export CONN_DB_NAME='mysql'
     mysql_admin_cmd <<EOF
 ${MYSQL_HEADER}
-CREATE DATABASE /*! IF NOT EXISTS */ ${DB_NAME};
+CREATE DATABASE /*! IF NOT EXISTS */ ${DB_NAME} DEFAULT CHARSET=utf8;
 EOF
     )
 
@@ -930,6 +930,17 @@ set_backup_file ()
         test -z "${last_seq}" && last_seq=100000
         next_seq="$( expr "${last_seq}" - 1 )"
         file="$(  printf "%s-%05d%s\n" "${DB_NAME}" "${next_seq}" ".sql" )"
+    fi
+}
+
+set_restore_file ()
+{
+    if test -z "${file}"
+    then
+        last_seq="$( last_file_seq "${DB_NAME}-" ".sql" )"
+        # 273.97260274 years worth of daily backups should be enough
+        test -z "${last_seq}" && last_seq=99999
+        file="$(  printf "%s-%05d%s\n" "${DB_NAME}" "${last_seq}" ".sql" )"
     fi
 }
 
@@ -1111,7 +1122,7 @@ res|rest|resto|restor|restore)
     (
     set_backup_options ${1+"$@"}
     goto_backup_dir
-    set_backup_file
+    set_restore_file
 
     if test ! -r "${file}"
     then
